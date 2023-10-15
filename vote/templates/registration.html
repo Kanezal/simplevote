@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="card mx-auto my-5" style="display: flex; width: 400px">
+        <form method="post" style="malgrin: auto;" class="card-body">
+            {% csrf_token %}
+            
+            {% comment %} {% for f in form %}
+                <p><label class="form-label" for="{{ f.id_for_label}}">: </label>{{ f }}</p>
+                <div class="form-error">{{ f.errors }}</div>
+            {% endfor %} {% endcomment %}
+
+            {{form | crispy}}
+
+            <button type="submit" class="btn btn-success">Регистрация</button>
+        </form>
+    </div>
+{% endblock %}

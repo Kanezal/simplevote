@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="card mx-auto my-5" style="display: flex; width: 400px">
+        <form method="post" style="malgrin: auto;" class="card-body">
+            {% csrf_token %}
+            
+            {% comment %} <div class="form-error">{{ form.non_field_errors }}</div> {% endcomment %}
+
+            {% comment %} {% for f in form %}
+                <label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>
+                {{ f }}
+                <div class="form-error">{{ f.errors }}</div>
+            {% endfor %}  {% endcomment %}
+
+            {{form|crispy}}
+
+            <button type="submit" class="btn btn-success">Войти</button>
+        </form>
+    </div>
+
+    {% comment %} <div class="card h-100">
+        <div class="card-body">
+            <a class="fs-5"> Голосование на тему: </a>
+            <br>
+            <h4 class="card-title">{{vote.title}}</h4>
+            <h6 class="card-subtitle mb-2 text-muted">Author: {{vote.author}} | ID: {{vote.id}}</h6>
+            <a href="/vote/?id={{vote.id}}" class="btn btn-primary">Учавствовать в голосовании</a>
+        </div>
+    </div> {% endcomment %}
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="card mx-auto my-5" style="display: flex; width: 600px" id="app">
+        <div style="malgrin: auto;" class="card-body">
+            <a class="fs-5"> Голосование на тему:</a> <br>
+            <h3>{{ vote_title }}</h3>
+            <hr>
+
+
+            {% if alert != None%}
+                <div class="alert alert-danger">
+                    {{alert}}
+                </div>
+            {% endif %}
+
+            {% if vote_passed != True %}
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="radio_choice" :value="picked"></input>
+
+                    <ul class="list-group" id="app">
+                    {% for choice in vote_choices %}
+                        <li class="list-group-item pl-5">
+                            {% if choice.lock_other == False %}
+                                <input type="checkbox" name={{choice.id}} class="form-check-input"></input>
+                                {{choice.title}}
+                            {% else %}
+                                <input type="radio"  value={{choice.id}} v-model="picked" class="form-check-input" required></input>
+                                {{choice.title}}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+
+                    <br>
+
+                    <input type="submit" class="btn btn-success mt-2"></input>
+                </form>
+            {% else %}
+                <h4>Статистика пройденного вами голосования:</h4>
+                <ul class="list-group">
+                    {% for choice, value in statistics.items %}
+                        {% if value.1 != 0 %}
+                            <li class="list-group-item list-group-item-success d-flex justify-content-between align-items-center">
+                                {{ choice }}
+                                <span class="badge bg-primary rounded-pill">{{ value.0 }}</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">
+                                {{ choice }}
+                                <span class="badge bg-primary rounded-pill">{{ value.0 }}</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        const vm = new Vue({
+            delimiters: ['[[', ']]'],
+            el: "#app",
+            data: {
+                count: 1,
+                picked: "",
+            },
+            methods: {
+                updateCount(change) {
+                    this.count = Math.max(1, Math.min(9, this.count + change));
+                },
+            },
+            mounted () {
+                this.id = this._uid
+            }
+        })
+    </script>
+{% endblock %}
