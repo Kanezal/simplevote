@@ -131,7 +131,7 @@ def vote_create(request):
                                         lock_other=("1" == str(request.POST.get("lock_other"))))
                     new_choice.save()
 
-                return HttpResponseRedirect('/vote_created/')
+                return redirect('vote', id=new_vote.id)
             else:
                 form_valid = False
         else:
@@ -154,89 +154,97 @@ def vote_created(request):
     return render(request, 'vote_created.html', context=get_base_context() | {'title': "Голосование создано"})
 
 
-def vote_view(request):
+def vote_view(request, id):
     """
     Функция для отображения конкретного голосования и обработки ответов пользователя.
     """
     form_valid = True
+    user_has_answered = Answer.objects.filter(question=id, user=request.user).exists()
 
-    # Getting the vote id from the request
-    vote_id = request.GET.get('id')
-    if vote_id is not None and vote_id != "":
-        # Checking if the user has already answered the vote
-        if len(Answer.objects.filter(question=Vote.objects.filter(id=vote_id)[0], user=request.user)) == 0:
-            if request.method == "POST":
-                # Getting the number of choices for this vote
-                count_choices = len(Choice.objects.filter(question_id=vote_id))
+    # Checking if the user has already answered the vote
+    if user_has_answered:
+        # Getting all answers for this vote
+        all_answers = Choice.objects.filter(question=id)
 
-                # Checking if the form is valid
-                if len(list(request.POST.items())) == 2 and list(request.POST.items())[1][1] == "":
-                    form_valid = False
-
-                # Getting the choice made by the user from the request
-                radio_choice = request.POST.get("radio_choice")
-
-                # If form is valid, save the user's answer
-                if form_valid:
-                    if len(radio_choice) == 0:
-                        for choice in list(request.POST.items())[2:]:
-                            new_answer = Answer(user=request.user,
-                                                question=Vote.objects.get(id=vote_id),
-                                                choice=Choice.objects.get(id=str(choice[0])),) # Creating the answer instance
-                            new_answer.save() # Saving the answer into the database
-                    else:
-                        choice = request.POST.get("radio_choice")
-                        new_answer = Answer(user=request.user,
-                                            question=Vote.objects.get(id=vote_id),
-                                            choice=Choice.objects.get(id=str(choice))) # Creating the answer instance
-                        new_answer.save() # Saving the answer into the database
-
-                    # Redirecting the user to the vote page
-                    return HttpResponseRedirect(f'/vote/?id={vote_id}')
-                else:
-                    ctx = {
-                        'vote_passed': False,
-                        'form_valid': form_valid,
-                        'vote_title': Vote.objects.filter(id=vote_id)[0],
-                        'vote_choices': Choice.objects.filter(question_id=vote_id),
-                        'alert': "Вы не выбрали ни один вариант голосования",
-                    }
-                    # Rendering the vote page with an alert for not choosing any option
-                    return render(request, 'vote.html',
-                                  context=(get_base_context() | ctx | {'title': "Голосование"}))
-        else:
-            # Getting all answers for this vote
-            all_answers = Answer.objects.filter(question=Vote.objects.get(id=vote_id))
-            variants_choices = []
-            for answer in all_answers:
-                if answer.choice_id not in variants_choices:
-                    variants_choices.append(answer.choice_id)
-            variants_choices.sort()
-
-            # Creating a dictionary to store the voting statistics
-            statistics = {}
-            for choice in variants_choices:
-                statistics[str(Choice.objects.get(id=choice).title)] = [len(list(Answer.objects.filter(choice=choice))),
-                                                                        len(list(Answer.objects.filter(choice=choice, user=request.user)))]
-            ctx = {
-                'vote_passed': True,
-                'form_valid': form_valid,
-                'vote_title': Vote.objects.filter(id=vote_id)[0],
-                'vote_choices': Choice.objects.filter(question_id=vote_id),
-                'statistics': statistics,
+        # Creating a dictionary to store the voting statistics
+        statistics = {}
+        for choice in all_answers:
+            statistics[choice.title] = {
+                "count": len(list(Answer.objects.filter(question=id, choice=choice))),
+                "is_user_choice": Answer.objects.filter(question=id, choice=choice, user=request.user).exists()
             }
-            # Rendering the vote page with voting statistics
-            return render(request, 'vote.html',
-                          context=(get_base_context() | ctx | {'title': "Голосование"}))
+        ctx = {
+            'vote_passed': True,
+            'form_valid': form_valid,
+            'vote_title': Vote.objects.filter(id=id)[0],
+            'vote_choices': Choice.objects.filter(question_id=id),
+            'statistics': statistics,
+        }
+        # Rendering the vote page with voting statistics
+        return render(
+            request, 
+            'vote.html',
+            context=(get_base_context() | ctx | {'title': "Голосование"})
+        )
+    
+    if request.method == "POST":
+        # Getting the number of choices for this vote
+        count_choices = len(Choice.objects.filter(question_id=id))
+
+        # Checking if the form is valid
+        if len(list(request.POST.items())) == 2 and list(request.POST.items())[1][1] == "":
+            form_valid = False
+
+        # Getting the choice made by the user from the request
+        radio_choice = request.POST.get("radio_choice")
+
+        # If form is valid, save the user's answer
+        if form_valid:
+            if len(radio_choice) == 0:
+                for choice in list(request.POST.items())[2:]:
+                    # Creating the answer instance
+                    new_answer = Answer(
+                        user=request.user,
+                        question=Vote.objects.get(id=id),
+                        choice=Choice.objects.get(id=str(choice[0]))
+                    ) 
+                    new_answer.save() # Saving the answer into the database
+            else:
+                choice = request.POST.get("radio_choice")
+                # Creating the answer instance
+                new_answer = Answer(
+                    user=request.user,
+                    question=Vote.objects.get(id=id),
+                    choice=Choice.objects.get(id=str(choice))
+                ) 
+                new_answer.save() # Saving the answer into the database
+
+            # Redirecting the user to the vote page
+            return redirect('vote', id=id)
+        else:
+            ctx = {
+                'vote_passed': False,
+                'form_valid': form_valid,
+                'vote_title': Vote.objects.filter(id=id)[0],
+                'vote_choices': Choice.objects.filter(question_id=id),
+                'alert': "Вы не выбрали ни один вариант голосования",
+            }
+            # Rendering the vote page with an alert for not choosing any option
+            return render(
+                request, 
+                'vote.html',
+                context=(get_base_context() | ctx | {'title': "Голосование"})
+            )
+    elif request.method == "GET":
         ctx = {
             'vote_passed': False,
             'form_valid': form_valid,
-            'vote_title': Vote.objects.filter(id=vote_id)[0],
-            'vote_choices': Choice.objects.filter(question_id=vote_id)
+            'vote_title': Vote.objects.filter(id=id)[0],
+            'vote_choices': Choice.objects.filter(question_id=id)
         }
         # Rendering the vote page
-        return render(request, 'vote.html',
-                      context=(get_base_context() | ctx | {'title': "Голосование"}))
-    else:
-        # No vote id found in the request, raising a 404 error
-        raise Http404
+        return render(
+            request, 
+            'vote.html',
+            context=(get_base_context() | ctx | {'title': "Голосование"})
+        )

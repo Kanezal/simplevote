@@ -3,7 +3,7 @@
 {% block content %}
     <div class="card mx-auto my-5" style="display: flex; width: 600px" id="app">
         {% if request.user.is_authenticated %}
-            <form action="" method="POST" style="malgrin: auto;" class="card-body">
+            <form action="" method="POST" style="margin: auto;" class="card-body">
                 <h1>Создать голосование</h1>
                 {% if not form_valid %}
                     <div>

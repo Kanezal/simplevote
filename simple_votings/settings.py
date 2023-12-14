@@ -57,7 +57,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            # 'vote/templates',
+            'templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -123,3 +123,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+LANGUAGE_CODE = 'ru'

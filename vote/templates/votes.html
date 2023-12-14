@@ -1,35 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
-    {% comment %} {% for vote in votes %}
-        <div class="card mb-3 col-md-8 mx-auto">
-            <div class="card-body">
-            <a class="fs-3"> Голосование на тему: </a> <a href="/vote/?id={{vote.id}}" class="card-title fs-3"> {{ vote.title }}</a>
-            <h6 class="card-subtitle mb-2 text-muted"> id: {{vote.id}}</h6>
-            </div>
-        </div>
-        <br>
-    {% endfor %} {% endcomment %}
-
-    {% comment %} <div style="display: flex; flex-wrap: wrap;">
-        {% for vote in votes %}
-        <div style="width: 550px; malgrin: 10px;">
-            <div class="card mb-3 col-md-8 mx-auto">
-                <div class="card-body" style="malgrin: 10px;">
-                    <a class="fs-5"> Голосование на тему: </a>
-                    <br>
-                    <h4 class="card-title">{{vote.title}}</h4>
-                    <h6 class="card-subtitle mb-2 text-muted">Author: {{vote.author}} | ID: {{vote.id}}</h6>
-                    <a href="/vote/?id={{vote.id}}" class="btn btn-primary">Учавствовать в голосовании</a>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    
-    <br> {% endcomment %}
-
-
     <div class="row row-cols-1 row-cols-md-3 g-4 mx-5 mt-2">
         {% for vote in votes %}
         <div class="col">
@@ -37,20 +7,18 @@
                 <div class="card-body">
                     <a class="fs-5"> Голосование на тему: </a>
                     <br>
-                    <h4 class="card-title">{{vote.title|truncatechars:20}}</h4>
+                    <h4 class="card-title" style="text-transform: capitalize;">{{vote.title|truncatechars:20}}</h4>
                     <div class="">
-                        <h6 class="card-subtitle mb-2 text-muted">Author: {{vote.author}} | ID: {{vote.id}}</h6>
-                        <a href="/vote/?id={{vote.id}}" class="btn btn-primary">Учавствовать в голосовании</a>
+                        <h6 class="card-subtitle mb-2 text-muted">Автор: {{vote.author}} | ID: {{vote.id}}</h6>
+                        <a href="{% url 'vote' id=vote.id %}" class="btn btn-primary">Учавствовать в голосовании</a>
                     </div>
                 </div>
             </div>
         </div>
+        {% empty %}
+            <div class="alert alert-warning mt-5" role="alert">
+                Сейчас нет доступных голосований!
+            </div>
         {% endfor %}
     </div>
-
-
-    {% comment %} <a href="?page=1">1</a>
-    <a href="?page=2">2</a>
-    <a href="?page=3">3</a>
-    <a href="?page=4">4</a> {% endcomment %}
 {% endblock %}
