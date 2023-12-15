@@ -25,8 +25,9 @@ SECRET_KEY = 'nmz=rv3p^bygc)^2scp6!n#!gm5ovqdpy4w0!g(53qt#7$(596'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'kanezal.pythonanywhere.com'
+]
 
 # Application definition
 
@@ -37,8 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'vote',
+
     'crispy_forms',
+
+    'vote',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +60,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            'templates',
+            os.path.join(BASE_DIR, "templates")
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -122,7 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Sett
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
-
 LANGUAGE_CODE = 'ru'
